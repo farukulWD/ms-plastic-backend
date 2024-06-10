@@ -28,6 +28,11 @@ export const userSchema = new Schema(
       enum: ["user", "admin", "master", "manger"],
       default: "user",
     },
+    isDeleted: {
+      type: Boolean,
+      enum: [true, false],
+      default: false,
+    },
   },
   {
     timestamps: true,
