@@ -20,6 +20,7 @@ const getUsersFromDb = async () => {
   const users = await User.find({});
   return users;
 };
+
 /*-------------------update user role-------------------- */
 
 const updateRole = async (id, email, role) => {
