@@ -1,3 +1,5 @@
+import config from "../../config/index.js";
+import { createToken } from "../../utils/authToken.js";
 import { User } from "../user/userModel.js";
 
 const loginUser = async (email, password) => {
@@ -5,9 +7,9 @@ const loginUser = async (email, password) => {
     throw new Error("Email and Password is required");
   }
 
-  const user = await User.findOne({ email: email });
+  const user = await User.isUserExistsByEmail(email);
 
-  if (!user.password === password) {
+  if (!(await User.isPasswordMatch(password, user?.password))) {
     throw new Error("Password did't match");
   }
 
@@ -15,7 +17,16 @@ const loginUser = async (email, password) => {
     throw new Error("The user was deleted");
   }
 
-  return user;
+  const jwtPayload = {
+    userId: user._id,
+    userEmail: user?.email,
+    role: user?.role,
+  };
+
+  const token = createToken(jwtPayload, config.access_token);
+
+  user.password = "";
+  return { user, token };
 };
 
 export const AuthServices = {
