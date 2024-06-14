@@ -1,7 +1,6 @@
 import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 import config from "../../config/index.js";
-import { ObjectId } from "mongodb";
 
 export const userSchema = new Schema(
   {
