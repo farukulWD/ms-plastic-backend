@@ -1,10 +1,11 @@
-import { Schema } from "mongoose";
+import { Schema, model } from "mongoose";
 
 export const productSchema = new Schema(
   {
     code: {
       type: String,
       require: true,
+      unique: true,
     },
     name: {
       type: String,
@@ -19,11 +20,6 @@ export const productSchema = new Schema(
       require: true,
     },
     company: {
-      type: String,
-      require: true,
-    },
-
-    netPrice: {
       type: String,
       require: true,
     },
