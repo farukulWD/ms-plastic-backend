@@ -11,6 +11,9 @@ export const productSchema = new Schema(
       type: String,
       require: true,
     },
+    image: {
+      type: String,
+    },
     groupName: {
       type: String,
       require: true,
@@ -22,6 +25,11 @@ export const productSchema = new Schema(
     company: {
       type: String,
       require: true,
+    },
+    quantity: {
+      type: Number,
+      require: true,
+      default: 1,
     },
   },
   {
