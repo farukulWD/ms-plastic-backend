@@ -37,7 +37,25 @@ const editProduct = async (req, res, next) => {
   }
 };
 
+const deleteProduct = async (req, res, next) => {
+  try {
+    const id = req.body;
+    if (id) {
+      const result = await ProductServices.deleteProductFromDB(id);
+      if (result) {
+        res
+          .status(200)
+          .json({ success: true, message: "The Product has been deleted" });
+      }
+    }
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+    next(error);
+  }
+};
+
 export const ProductControllers = {
   addProduct,
   editProduct,
+  deleteProduct,
 };

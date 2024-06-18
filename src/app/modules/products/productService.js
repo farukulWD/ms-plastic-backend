@@ -57,7 +57,22 @@ const editProduct = async (id, product) => {
   }
 };
 
+const deleteProductFromDB = async (id) => {
+  if (!id) {
+    throw new Error("Id is required");
+  }
+
+  const product = await Product.findOne({ _id: new ObjectId(id) });
+  if (product) {
+    const result = Product.findOneAndDelete({ _id: new ObjectId(id) });
+    return result;
+  } else {
+    throw new Error("Product is not found");
+  }
+};
+
 export const ProductServices = {
   addProductIntoDB,
   editProduct,
+  deleteProductFromDB,
 };
