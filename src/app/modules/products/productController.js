@@ -18,6 +18,16 @@ const addProduct = async (req, res, next) => {
   }
 };
 
+const getProducts = async (req, res, next) => {
+  try {
+    const result = await ProductServices.getProductsFromDB();
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+    next(error);
+  }
+};
+
 const editProduct = async (req, res, next) => {
   try {
     const id = req.params;
@@ -56,6 +66,7 @@ const deleteProduct = async (req, res, next) => {
 
 export const ProductControllers = {
   addProduct,
+  getProducts,
   editProduct,
   deleteProduct,
 };

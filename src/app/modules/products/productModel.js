@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 
 export const productSchema = new Schema(
   {
@@ -30,6 +30,11 @@ export const productSchema = new Schema(
       type: Number,
       require: true,
       default: 1,
+    },
+    addedBy: {
+      type: mongoose.Types.ObjectId,
+      require: true,
+      ref: "User",
     },
   },
   {

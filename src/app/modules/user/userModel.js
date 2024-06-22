@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 import config from "../../config/index.js";
 
@@ -35,6 +35,7 @@ export const userSchema = new Schema(
       enum: [true, false],
       default: false,
     },
+    addedProducts: [{ type: mongoose.Types.ObjectId, ref: "Product" }],
   },
   {
     timestamps: true,

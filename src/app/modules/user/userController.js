@@ -7,14 +7,14 @@ const createUser = async (req, res, next) => {
     const userData = req?.body;
 
     const result = await UserServices.createUserIntoDB(userData);
-    res.status(200).json({ Success: true, data: result });
+    res.status(200).json({ success: true, data: result });
   } catch (error) {
     if (error.message === "Email already exists") {
-      res.status(400).json({ Success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     } else {
       res
         .status(500)
-        .json({ Success: false, message: "Internal Server Error" });
+        .json({ success: false, message: "Internal Server Error" });
     }
     next(error);
   }
@@ -25,9 +25,22 @@ const createUser = async (req, res, next) => {
 const getUsers = async (req, res, next) => {
   try {
     const result = await UserServices.getUsersFromDb();
-    res.status(200).json({ Success: true, data: result });
+    res.status(200).json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ Success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+    next(error);
+  }
+};
+
+/*-------------------get single user-------------------- */
+
+const getUser = async (req, res, next) => {
+  try {
+    const id = req.query.id;
+    const result = await UserServices.getSingleUserFromDB(id);
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
     next(error);
   }
 };
@@ -38,12 +51,12 @@ const updateUserRole = async (req, res, next) => {
   try {
     const { id, email, role } = req?.body;
     const result = await UserServices.updateRole(id, email, role);
-    res.status(200).json({ Success: true, data: result });
+    res.status(200).json({ success: true, data: result });
   } catch (error) {
     if (error.message === "Email is required") {
-      res.status(400).json({ Success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     } else if (error.message === "User Not found") {
-      res.status(400).json({ Success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     } else {
       res
         .status(500)
@@ -63,11 +76,11 @@ const deleteUser = async (req, res, next) => {
     res.status(200).json({ Success: true, data: result });
   } catch (error) {
     if (error.message === "Id is required") {
-      res.status(400).json({ Success: false, message: error.message });
+      res.status(400).json({ success: false, message: error.message });
     } else {
       res
         .status(500)
-        .json({ Success: false, message: "Internal Server Error" });
+        .json({ success: false, message: "Internal Server Error" });
     }
     next(error);
   }
@@ -76,6 +89,7 @@ const deleteUser = async (req, res, next) => {
 export const UserControllers = {
   createUser,
   getUsers,
+  getUser,
   updateUserRole,
   deleteUser,
 };

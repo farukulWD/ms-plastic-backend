@@ -17,8 +17,22 @@ const createUserIntoDB = async (user) => {
 /*-------------------get all users-------------------- */
 
 const getUsersFromDb = async () => {
-  const users = await User.find({});
+  const users = await User.find({}).populate("addedProducts");
   return users;
+};
+
+/*-------------------get single user-------------------- */
+
+const getSingleUserFromDB = async (id) => {
+  if (!id) {
+    throw new Error("Id is required");
+  }
+  if (id) {
+    const user = User.findOne({ _id: new ObjectId(id) }).populate(
+      "addedProducts"
+    );
+    return user;
+  }
 };
 
 /*-------------------update user role-------------------- */
@@ -66,4 +80,5 @@ export const UserServices = {
   updateRole,
   deleteUserFromDb,
   getUsersFromDb,
+  getSingleUserFromDB,
 };

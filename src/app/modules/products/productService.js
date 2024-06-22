@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Product } from "./productModel.js";
+import { User } from "../user/userModel.js";
 
 const addProductIntoDB = async (product) => {
   if (!product.code) {
@@ -17,8 +18,24 @@ const addProductIntoDB = async (product) => {
   if (!product.company) {
     throw new Error("Product company name is required");
   }
+  if (!product.addedBy) {
+    throw new Error("Product addedBy is required");
+  }
 
+  /*************************get user********************/
+  const user = await User.findById(product.addedBy);
+  if (!user) {
+    throw new Error("User not found");
+  }
   const result = await Product.create(product);
+  user.addedProducts.push(result._id);
+  await user.save();
+
+  return result;
+};
+
+const getProductsFromDB = async () => {
+  const result = Product.find({}).populate("addedBy");
   return result;
 };
 
@@ -75,4 +92,5 @@ export const ProductServices = {
   addProductIntoDB,
   editProduct,
   deleteProductFromDB,
+  getProductsFromDB,
 };
