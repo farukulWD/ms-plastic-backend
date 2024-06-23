@@ -1,26 +1,29 @@
 import mongoose, { Schema, model } from "mongoose";
 
+const productsSchema = new Schema(
+  {
+    product: {
+      type: mongoose.Types.ObjectId,
+      ref: "Product",
+      required: true,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+  },
+  { _id: false }
+);
+
 export const cartSchema = new Schema(
   {
-    products: [
-      {
-        productId: {
-          type: mongoose.Types.ObjectId,
-          ref: "Product",
-          required: true,
-        },
-        quantity: {
-          type: Number,
-          required: true,
-          min: 1,
-        },
-      },
-    ],
+    products: [productsSchema],
 
-    userId: {
+    user: {
       type: mongoose.Types.ObjectId,
-      rel: "User",
-      require: true,
+      required: true,
+      ref: "User",
     },
     totalPrice: {
       type: Number,
@@ -34,13 +37,13 @@ export const cartSchema = new Schema(
 );
 cartSchema.pre("save", async function (next) {
   if (this.isModified("products")) {
-    const productIds = this.products.map((p) => p.productId);
+    const productIds = this.products.map((p) => p.product);
     const products = await mongoose
       .model("Product")
       .find({ _id: { $in: productIds } });
 
     this.totalPrice = this.products.reduce((acc, cartProduct) => {
-      const product = products.find((p) => p._id.equals(cartProduct.productId));
+      const product = products.find((p) => p._id.equals(cartProduct.product));
       return acc + product.price * cartProduct.quantity;
     }, 0);
   }
