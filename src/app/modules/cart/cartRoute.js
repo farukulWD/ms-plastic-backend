@@ -6,5 +6,6 @@ const router = Router();
 router.post("/add-cart", CartControllers.addCart);
 router.get("/get-carts", CartControllers.getCarts);
 router.delete("/delete-cart", CartControllers.deleteCart);
+router.patch("/edit-cart/:id", CartControllers.editCart);
 
 export const cartRoutes = router;
