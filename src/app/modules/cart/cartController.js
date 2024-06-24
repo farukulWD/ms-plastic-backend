@@ -20,7 +20,7 @@ const getCarts = async (req, res) => {
     next(error);
   }
 };
-const deleteCart = async (req, res) => {
+const deleteCart = async (req, res, next) => {
   try {
     const id = req.body;
     await CartServices.deleteCartFromDB(id);
@@ -33,8 +33,21 @@ const deleteCart = async (req, res) => {
   }
 };
 
+const editCart = async (req, res, next) => {
+  try {
+    const id = req.params;
+    const product = req.body;
+    await CartServices.editCart(id, product);
+    res.status(200).json({ success: true, message: "Update has been success" });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+    next(error);
+  }
+};
+
 export const CartControllers = {
   addCart,
   getCarts,
   deleteCart,
+  editCart,
 };
