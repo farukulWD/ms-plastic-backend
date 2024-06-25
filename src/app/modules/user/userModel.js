@@ -2,6 +2,13 @@ import mongoose, { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 import config from "../../config/index.js";
 
+export const user_role = {
+  admin: "admin",
+  master: "master",
+  manager: "manager",
+  user: "user",
+};
+
 export const userSchema = new Schema(
   {
     name: {
