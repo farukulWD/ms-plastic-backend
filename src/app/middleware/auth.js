@@ -1,43 +1,33 @@
 import jwt from "jsonwebtoken";
 import config from "../config/index.js";
 import { User } from "../modules/user/userModel.js";
+import catchAsync from "../utils/catchAsync.js";
+import AppError from "../errors/AppError.js";
+import httpStatus from "http-status";
 
 const auth = (...roles) => {
-  return async (req, res, next) => {
+  return catchAsync(async (req, res, next) => {
     const token = req.headers.authorization;
     if (!token) {
-      throw new Error("Authorization require");
+      throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized!");
     }
 
-    try {
-      const decode = jwt.verify(token, config.access_token);
-      const { userId, userEmail } = decode;
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(403).json({
-          success: false,
-          message: "user not found",
-        });
-      }
-
-      if (user?.isDeleted) {
-        return res.status(403).json({
-          success: false,
-          message: "This user is deleted",
-        });
-      }
-
-      if (roles.length && !roles.includes(decode.role)) {
-        return res.status(403).json({
-          success: false,
-          message: "Forbidden: You do not have the right permissions",
-        });
-      }
-      next();
-    } catch (error) {
-      return res.status(401).json({ success: false, message: "Invalid token" });
+    const decode = jwt.verify(token, config.access_token);
+    const { userId, userEmail } = decode;
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
     }
-  };
+
+    if (user?.isDeleted) {
+      throw new AppError(httpStatus.FORBIDDEN, "This user is deleted !");
+    }
+
+    if (roles.length && !roles.includes(decode.role)) {
+      throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized !");
+    }
+    next();
+  });
 };
 
 export default auth;
