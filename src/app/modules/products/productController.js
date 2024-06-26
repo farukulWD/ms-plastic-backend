@@ -1,67 +1,66 @@
+import httpStatus from "http-status";
+import catchAsync from "../../utils/catchAsync.js";
 import { ProductServices } from "./productService.js";
+import AppError from "../../errors/AppError.js";
 
-const addProduct = async (req, res, next) => {
-  try {
-    const product = req.body;
-    if (product && Object.keys(product).length > 0) {
-      const result = await ProductServices.addProductIntoDB(product);
-      res.status(200).json({ success: true, data: result });
-    } else {
-      res.status(400).json({
-        success: false,
-        message: "Product is required and can not be empty",
-      });
-    }
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-    next(error);
+const addProduct = catchAsync(async (req, res) => {
+  const product = req.body;
+  if (product && Object.keys(product).length > 0) {
+    const result = await ProductServices.addProductIntoDB(product);
+    sendResponse(res, {
+      statusCode: httpStatus.CREATED,
+      message: "Product is created",
+      success: true,
+      data: result,
+    });
+  } else {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Product is required and can not be empty"
+    );
   }
-};
+});
 
-const getProducts = async (req, res, next) => {
-  try {
-    const result = await ProductServices.getProductsFromDB();
-    res.status(200).json({ success: true, data: result });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal Server Error" });
-    next(error);
-  }
-};
+const getProducts = catchAsync(async (req, res) => {
+  const result = await ProductServices.getProductsFromDB();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Get Products success",
+    success: true,
+    data: result,
+  });
+});
 
 const editProduct = async (req, res, next) => {
-  try {
-    const id = req.params;
-    const product = req.body;
-    if (product && Object.keys(product).length > 0) {
-      const result = await ProductServices.editProduct(id, product);
-      res.status(200).json({ success: true, data: result });
-    } else {
-      res.status(400).json({
-        success: false,
-        message: "Product is required and can not be empty",
-      });
-    }
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-    next(error);
+  const id = req.params;
+  const product = req.body;
+  if (product && Object.keys(product).length > 0) {
+    const result = await ProductServices.editProduct(id, product);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      message: "Edit Product has been success",
+      success: true,
+      data: result,
+    });
+  } else {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Product is required and can not be empty"
+    );
   }
 };
 
 const deleteProduct = async (req, res, next) => {
-  try {
-    const id = req.body;
-    if (id) {
-      const result = await ProductServices.deleteProductFromDB(id);
-      if (result) {
-        res
-          .status(200)
-          .json({ success: true, message: "The Product has been deleted" });
-      }
-    }
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-    next(error);
+  const id = req.body;
+  if (!id) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Id is required");
   }
+  const result = await ProductServices.deleteProductFromDB(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "The Product has been deleted",
+    success: true,
+  });
 };
 
 export const ProductControllers = {

@@ -1,15 +1,12 @@
 import { ObjectId } from "mongodb";
 import { User } from "./userModel.js";
+import AppError from "../../errors/AppError.js";
+import httpStatus from "http-status";
 
 /*-------------------create user-------------------- */
 
 const createUserIntoDB = async (user) => {
   const userData = user;
-
-  const existingUser = await User.findOne({ email: userData.email });
-  if (existingUser) {
-    throw new Error("Email already exists");
-  }
   const newUser = await User.create(userData);
   return newUser;
 };
@@ -25,7 +22,7 @@ const getUsersFromDb = async () => {
 
 const getSingleUserFromDB = async (id) => {
   if (!id) {
-    throw new Error("Id is required");
+    throw new AppError(httpStatus.BAD_REQUEST, "Id is required");
   }
   if (id) {
     const user = User.findOne({ _id: new ObjectId(id) }).populate(
@@ -39,7 +36,7 @@ const getSingleUserFromDB = async (id) => {
 
 const updateRole = async (id, email, role) => {
   if (!email && !id) {
-    throw new Error("Email or Id is required");
+    throw new AppError(httpStatus.BAD_REQUEST, "Email or Id is required");
   }
   const user = await User.findOne({ email: email, _id: new ObjectId(id) });
   const filter = { email: user?.email, _id: new ObjectId(user?._id) };
@@ -51,7 +48,7 @@ const updateRole = async (id, email, role) => {
     });
     return result;
   } else {
-    throw new Error("User Not found");
+    throw new AppError(httpStatus.BAD_REQUEST, "User Not found");
   }
 };
 
@@ -59,7 +56,7 @@ const updateRole = async (id, email, role) => {
 
 const deleteUserFromDb = async (id) => {
   if (!id) {
-    throw new Error("Id is required");
+    throw new AppError(httpStatus.BAD_REQUEST, "Id is required");
   }
   const user = await User.findOne({ _id: new ObjectId(id) });
   const filter = { _id: new ObjectId(user?._id) };
@@ -71,7 +68,7 @@ const deleteUserFromDb = async (id) => {
     });
     return result;
   } else {
-    throw new Error("User Not found");
+    throw new AppError(httpStatus.BAD_REQUEST, "User Not found");
   }
 };
 

@@ -15,13 +15,11 @@ router.get("/user/:id", UserControllers.getUser);
 router.patch(
   "/update-user-role",
   auth(user_role.admin, user_role.master),
-  UserControllers.getUsers,
   UserControllers.updateUserRole
 );
 router.delete(
   "/delete-user",
   auth(user_role.admin, user_role.master),
-  UserControllers.getUsers,
   UserControllers.deleteUser
 );
 

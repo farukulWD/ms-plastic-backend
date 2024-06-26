@@ -14,7 +14,7 @@ const handleDuplicateError = (err) => {
 
   return {
     statusCode,
-    message: "Invalid ID",
+    message: `${extractedMessage} is already exists`,
     errorSources,
   };
 };
