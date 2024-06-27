@@ -2,6 +2,7 @@ import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync.js";
 import { ProductServices } from "./productService.js";
 import AppError from "../../errors/AppError.js";
+import sendResponse from "../../utils/sendResponse.js";
 
 const addProduct = catchAsync(async (req, res) => {
   const product = req.body;

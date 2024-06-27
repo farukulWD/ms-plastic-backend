@@ -1,53 +1,69 @@
+import httpStatus from "http-status";
+import catchAsync from "../../utils/catchAsync.js";
+import sendResponse from "../../utils/sendResponse.js";
 import { CartServices } from "./cartService.js";
 
-const addCart = async (req, res, next) => {
-  try {
-    const { user, products } = req.body;
-    const result = await CartServices.makeCartIntoDB(user, products);
-    res.status(200).json({ success: true, data: result });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-    next(error);
-  }
-};
+/****************** create cart ************************/
+const addCart = catchAsync(async (req, res, next) => {
+  const { user, products } = req.body;
+  const result = await CartServices.makeCartIntoDB(user, products);
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    message: "Added Product success",
+    success: true,
+    data: result,
+  });
+});
 
-const getCarts = async (req, res) => {
-  try {
-    const result = await CartServices.getCartsFromDB();
-    res.status(200).json({ success: true, data: result });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-    next(error);
-  }
-};
-const deleteCart = async (req, res, next) => {
-  try {
-    const id = req.body;
-    await CartServices.deleteCartFromDB(id);
-    res
-      .status(200)
-      .json({ success: true, message: "The cart has been deleted" });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-    next(error);
-  }
-};
+/****************** get all carts ************************/
+const getCarts = catchAsync(async (req, res) => {
+  const result = await CartServices.getCartsFromDB();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Get carts success",
+    success: true,
+    data: result,
+  });
+});
 
-const editCart = async (req, res, next) => {
-  try {
-    const id = req.params;
-    const product = req.body;
-    await CartServices.editCart(id, product);
-    res.status(200).json({ success: true, message: "Update has been success" });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-    next(error);
-  }
-};
+/******************get single cart************************/
+const getCart = catchAsync(async (req, res) => {
+  const id = req.params;
+  const result = await CartServices.getSingleCartFromDB(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Get cart success",
+    success: true,
+    data: result,
+  });
+});
+
+/******************Delete cart************************/
+const deleteCart = catchAsync(async (req, res, next) => {
+  const id = req.body;
+  await CartServices.deleteCartFromDB(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "The cart has been deleted",
+    success: true,
+  });
+});
+/******************edit cart************************/
+const editCart = catchAsync(async (req, res, next) => {
+  const id = req.params;
+  const product = req.body;
+  await CartServices.editCart(id, product);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Update has been success",
+    success: true,
+  });
+});
 
 export const CartControllers = {
   addCart,
   getCarts,
   deleteCart,
   editCart,
+  getCart,
 };

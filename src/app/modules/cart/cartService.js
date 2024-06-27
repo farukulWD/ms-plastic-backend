@@ -5,18 +5,21 @@ import {
   updateProductQuantities,
   calculateTotalPrice,
 } from "../../utils/aggregation/index.js";
+import AppError from "../../errors/AppError.js";
+import httpStatus from "http-status";
 
+/******************add cart************************/
 const makeCartIntoDB = async (userId, products) => {
   if (!userId) {
-    throw new Error("User Id is required");
+    throw new AppError(httpStatus.BAD_REQUEST, "User Id is required");
   }
   if (products.length === 0) {
-    throw new Error("Products cannot be empty");
+    throw new AppError(httpStatus.BAD_REQUEST, "Products cannot be empty");
   }
 
   const userFind = await User.findOne({ _id: new ObjectId(userId) });
   if (!userFind) {
-    throw new Error("User not found");
+    throw new AppError(httpStatus.BAD_REQUEST, "User not found");
   }
 
   const data = { user: userId, products };
@@ -31,21 +34,31 @@ const makeCartIntoDB = async (userId, products) => {
   return cart;
 };
 
+/******************gets all carts************************/
 const getCartsFromDB = async () => {
   const result = await Cart.find({})
     .populate("products.product")
     .populate("user");
   return result;
 };
+/******************get single cart************************/
+const getSingleCartFromDB = async (id) => {
+  if (!id) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Cart Id is required");
+  }
+  const result = await Cart.findById({ _id: new ObjectId(id) });
+  return result;
+};
 
+/******************edit cart************************/
 const editCart = async (id, product) => {
   if (!product) {
-    throw new Error("Product is Required");
+    throw new AppError(httpStatus.BAD_REQUEST, "Product is Required");
   }
 
   const cart = await Cart.findOne({ _id: new ObjectId(id) });
   if (!cart) {
-    throw new Error("Cart not found");
+    throw new AppError(httpStatus.BAD_REQUEST, "Cart not found");
   }
   const filter = { _id: new ObjectId(id) };
   await updateProductQuantities(cart?._id, product.products, "edit");
@@ -60,15 +73,16 @@ const editCart = async (id, product) => {
   return updatedCart;
 };
 
+/******************Delete cart************************/
 const deleteCartFromDB = async (cartId) => {
   if (!cartId) {
-    throw new Error("Cart Id is required");
+    throw new AppError(httpStatus.BAD_REQUEST, "Cart Id is required");
   }
 
   const findCart = await Cart.findOne({ _id: new ObjectId(cartId) });
 
   if (!findCart) {
-    throw new Error("Cart not found");
+    throw new AppError(httpStatus.BAD_REQUEST, "Cart not found");
   }
   await updateProductQuantities(findCart?._id, findCart.products, "delete");
 
@@ -81,4 +95,5 @@ export const CartServices = {
   getCartsFromDB,
   deleteCartFromDB,
   editCart,
+  getSingleCartFromDB,
 };

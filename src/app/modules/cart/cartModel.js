@@ -30,6 +30,10 @@ export const cartSchema = new Schema(
       required: true,
       default: 0,
     },
+    isOrder: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
