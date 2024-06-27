@@ -13,24 +13,24 @@ export const userSchema = new Schema(
   {
     name: {
       type: String,
-      require: true,
+      required: true,
     },
     email: {
       type: String,
-      require: true,
+      required: true,
       unique: true,
     },
     password: {
       type: String,
-      require: true,
+      required: true,
     },
     profilePicture: {
       type: String,
-      require: true,
+      required: true,
     },
     mobile: {
       type: Number,
-      require: true,
+      required: true,
     },
     role: {
       type: String,

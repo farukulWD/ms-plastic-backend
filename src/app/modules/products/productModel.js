@@ -4,36 +4,37 @@ export const productSchema = new Schema(
   {
     code: {
       type: String,
-      require: true,
+      required: true,
       unique: true,
     },
     name: {
       type: String,
-      require: true,
+      required: true,
     },
     image: {
       type: String,
     },
     groupName: {
       type: String,
-      require: true,
+      enum: ["pride", "tel-household", "tel-furniture", "pacific", "prominent"],
+      required: true,
     },
     price: {
       type: Number,
-      require: true,
+      required: true,
     },
     company: {
       type: String,
-      require: true,
+      required: true,
     },
     quantity: {
       type: Number,
-      require: true,
+      required: true,
       default: 1,
     },
     addedBy: {
       type: mongoose.Types.ObjectId,
-      require: true,
+      required: true,
       ref: "User",
     },
   },

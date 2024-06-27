@@ -34,6 +34,11 @@ export const cartSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    groupName: {
+      type: String,
+      enum: ["pride", "tel-household", "tel-furniture", "pacific", "prominent"],
+      required: true,
+    },
   },
   {
     timestamps: true,

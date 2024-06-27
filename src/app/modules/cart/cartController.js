@@ -5,8 +5,8 @@ import { CartServices } from "./cartService.js";
 
 /****************** create cart ************************/
 const addCart = catchAsync(async (req, res, next) => {
-  const { user, products } = req.body;
-  const result = await CartServices.makeCartIntoDB(user, products);
+  const data = req.body;
+  const result = await CartServices.makeCartIntoDB(data?.user, data);
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     message: "Added Product success",

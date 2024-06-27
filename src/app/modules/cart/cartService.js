@@ -9,7 +9,8 @@ import AppError from "../../errors/AppError.js";
 import httpStatus from "http-status";
 
 /******************add cart************************/
-const makeCartIntoDB = async (userId, products) => {
+const makeCartIntoDB = async (userId, bodyData) => {
+  const products = bodyData?.products;
   if (!userId) {
     throw new AppError(httpStatus.BAD_REQUEST, "User Id is required");
   }
@@ -22,9 +23,7 @@ const makeCartIntoDB = async (userId, products) => {
     throw new AppError(httpStatus.BAD_REQUEST, "User not found");
   }
 
-  const data = { user: userId, products };
-
-  const cart = await Cart.create(data);
+  const cart = await Cart.create(bodyData);
 
   await updateProductQuantities(cart._id, products, "add");
 
