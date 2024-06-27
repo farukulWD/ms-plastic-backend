@@ -3,6 +3,9 @@ import { Product } from "./productModel.js";
 import { User } from "../user/userModel.js";
 import AppError from "../../errors/AppError.js";
 import httpStatus from "http-status";
+import buildFilter from "../../utils/buildFilter.js";
+
+/**------------------add product------------------------ */
 
 const addProductIntoDB = async (product) => {
   if (!product.code) {
@@ -27,7 +30,6 @@ const addProductIntoDB = async (product) => {
     throw new AppError(httpStatus.BAD_REQUEST, "Product addedBy is required");
   }
 
-  /*************************get user********************/
   const user = await User.findById(product.addedBy);
   if (!user) {
     throw new AppError(httpStatus.BAD_REQUEST, "User not found");
@@ -39,11 +41,36 @@ const addProductIntoDB = async (product) => {
   return result;
 };
 
-const getProductsFromDB = async () => {
-  const result = Product.find({}).populate("addedBy");
-  return result;
+/**--------------------get products------------------- */
+
+const getProductsFromDB = async (query) => {
+  const { page, limit, ...rest } = query;
+
+  const filter = buildFilter(rest);
+
+  const pageNumber = parseInt(page, 10) || 1;
+  const limitNumber = parseInt(limit, 10) || 10;
+  const skip = (pageNumber - 1) * limitNumber;
+
+  const products = await Product.find(filter)
+    .populate("addedBy")
+    .limit(limit)
+    .skip(skip);
+
+  const totalProducts = await Product.countDocuments(filter);
+  const totalPages = Math.ceil(totalProducts / limitNumber);
+
+  return {
+    products,
+    pagination: {
+      total: totalProducts,
+      totalPages,
+      currentPage: pageNumber,
+    },
+  };
 };
 
+/**--------------------edit products------------------- */
 const editProduct = async (id, product) => {
   if (!id) {
     throw new AppError(httpStatus.BAD_REQUEST, "Id is required");
@@ -81,6 +108,8 @@ const editProduct = async (id, product) => {
     throw new AppError(httpStatus.BAD_REQUEST, "Product not found");
   }
 };
+
+/**--------------------edit products------------------- */
 
 const deleteProductFromDB = async (id) => {
   if (!id) {
