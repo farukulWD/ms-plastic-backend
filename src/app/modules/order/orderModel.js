@@ -27,7 +27,7 @@ export const orderSchema = Schema(
     },
   },
   {
-    Timestamp: true,
+    timestamp: true,
   }
 );
 

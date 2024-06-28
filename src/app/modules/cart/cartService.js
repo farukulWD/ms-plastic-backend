@@ -7,6 +7,7 @@ import {
 } from "../../utils/aggregation/index.js";
 import AppError from "../../errors/AppError.js";
 import httpStatus from "http-status";
+import buildFilter from "../../utils/buildFilter.js";
 
 /******************add cart************************/
 const makeCartIntoDB = async (userId, bodyData) => {
@@ -34,11 +35,42 @@ const makeCartIntoDB = async (userId, bodyData) => {
 };
 
 /******************gets all carts************************/
-const getCartsFromDB = async () => {
-  const result = await Cart.find({})
+const getCartsFromDB = async (query) => {
+  const { page, limit, sort, isOrder, user, ...rest } = query;
+
+  const filter = buildFilter(rest);
+
+  if (isOrder === "true" || isOrder === "false") {
+    filter.isOrder = isOrder;
+  }
+  if (user) {
+    filter.user = new ObjectId(user);
+  }
+
+  const sortOption = {
+    createdAt: sort === "newest" ? -1 : 1,
+  };
+  const pageNumber = parseInt(page);
+  const limitNumber = parseInt(limit);
+  const skip = (pageNumber - 1) * limitNumber;
+
+  const carts = await Cart.find(filter)
     .populate("products.product")
-    .populate("user");
-  return result;
+    .populate("user")
+    .sort(sortOption)
+    .limit(limitNumber)
+    .skip(skip);
+  const totalCarts = await Cart.countDocuments(filter);
+  const totalPages = Math.ceil(totalCarts / limitNumber);
+
+  return {
+    carts,
+    pagination: {
+      total: totalCarts,
+      totalPages,
+      currentPage: pageNumber,
+    },
+  };
 };
 /******************get single cart************************/
 const getSingleCartFromDB = async (id) => {
@@ -58,6 +90,9 @@ const editCart = async (id, product) => {
   const cart = await Cart.findOne({ _id: new ObjectId(id) });
   if (!cart) {
     throw new AppError(httpStatus.BAD_REQUEST, "Cart not found");
+  }
+  if (cart.isOrder) {
+    throw new AppError(httpStatus.BAD_REQUEST, "The cart is all ready ordered");
   }
   const filter = { _id: new ObjectId(id) };
   await updateProductQuantities(cart?._id, product.products, "edit");
@@ -82,6 +117,9 @@ const deleteCartFromDB = async (cartId) => {
 
   if (!findCart) {
     throw new AppError(httpStatus.BAD_REQUEST, "Cart not found");
+  }
+  if (findCart.isOrder) {
+    throw new AppError(httpStatus.BAD_REQUEST, "The cart is all ready ordered");
   }
   await updateProductQuantities(findCart?._id, findCart.products, "delete");
 

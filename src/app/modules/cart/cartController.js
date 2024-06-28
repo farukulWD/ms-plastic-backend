@@ -17,7 +17,8 @@ const addCart = catchAsync(async (req, res, next) => {
 
 /****************** get all carts ************************/
 const getCarts = catchAsync(async (req, res) => {
-  const result = await CartServices.getCartsFromDB();
+  const query = req.query;
+  const result = await CartServices.getCartsFromDB(query);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     message: "Get carts success",

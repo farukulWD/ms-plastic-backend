@@ -44,9 +44,16 @@ const addProductIntoDB = async (product) => {
 /**--------------------get products------------------- */
 
 const getProductsFromDB = async (query) => {
-  const { page, limit, ...rest } = query;
+  const { page, limit, sort, addedBy, ...rest } = query;
 
   const filter = buildFilter(rest);
+
+  const sortOption = {
+    updatedAt: sort === "newest" ? -1 : 1,
+  };
+  if (addedBy) {
+    filter.addedBy = new ObjectId(addedBy);
+  }
 
   const pageNumber = parseInt(page, 10) || 1;
   const limitNumber = parseInt(limit, 10) || 10;
@@ -55,7 +62,8 @@ const getProductsFromDB = async (query) => {
   const products = await Product.find(filter)
     .populate("addedBy")
     .limit(limit)
-    .skip(skip);
+    .skip(skip)
+    .sort(sortOption);
 
   const totalProducts = await Product.countDocuments(filter);
   const totalPages = Math.ceil(totalProducts / limitNumber);
@@ -70,7 +78,23 @@ const getProductsFromDB = async (query) => {
   };
 };
 
+/*------------------Get single product-------------- */
+
+const getSingleProductFromDB = async (id) => {
+  if (!id) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Id is Required");
+  }
+
+  const product = await Product.findOne({ _id: new ObjectId(id) });
+  if (!product) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Product not found");
+  }
+
+  return product;
+};
+
 /**--------------------edit products------------------- */
+
 const editProduct = async (id, product) => {
   if (!id) {
     throw new AppError(httpStatus.BAD_REQUEST, "Id is required");
@@ -130,4 +154,5 @@ export const ProductServices = {
   editProduct,
   deleteProductFromDB,
   getProductsFromDB,
+  getSingleProductFromDB,
 };

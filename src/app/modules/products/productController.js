@@ -4,6 +4,8 @@ import { ProductServices } from "./productService.js";
 import AppError from "../../errors/AppError.js";
 import sendResponse from "../../utils/sendResponse.js";
 
+/*----------------Add product-----------------*/
+
 const addProduct = catchAsync(async (req, res) => {
   const product = req.body;
   if (product && Object.keys(product).length > 0) {
@@ -22,6 +24,8 @@ const addProduct = catchAsync(async (req, res) => {
   }
 });
 
+/*-----------------Get All Products---------------*/
+
 const getProducts = catchAsync(async (req, res) => {
   const query = req.query;
 
@@ -33,6 +37,19 @@ const getProducts = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
+const getSingleProduct = catchAsync(async (req, res) => {
+  const id = req.params;
+  const result = await ProductServices.getSingleProductFromDB(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Product get success",
+    data: result,
+    success: true,
+  });
+});
+
+/*---------------------Edit Product-------------------*/
 
 const editProduct = async (req, res, next) => {
   const id = req.params;
@@ -53,6 +70,8 @@ const editProduct = async (req, res, next) => {
   }
 };
 
+/*--------------------Delete Product--------------------*/
+
 const deleteProduct = async (req, res, next) => {
   const id = req.body;
   if (!id) {
@@ -70,5 +89,6 @@ export const ProductControllers = {
   addProduct,
   getProducts,
   editProduct,
+  getSingleProduct,
   deleteProduct,
 };
