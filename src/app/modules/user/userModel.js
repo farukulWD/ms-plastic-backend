@@ -42,6 +42,9 @@ export const userSchema = new Schema(
       enum: [true, false],
       default: false,
     },
+    passwordChangedAt: {
+      type: Date,
+    },
     addedProducts: [{ type: mongoose.Types.ObjectId, ref: "Product" }],
   },
   {
