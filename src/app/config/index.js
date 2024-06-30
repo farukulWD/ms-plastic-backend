@@ -9,5 +9,5 @@ export default {
   database_url: process.env.DATABASE_URL,
   bcrypt_salt_rounds: process.env.BYCRIPT_HASH_ROUNDS,
   access_token: process.env.JWT_ACCESS_SECRET,
-  reset_pass_ui_link: process.env.RESET_PASS_UI_LINK,
+  frontendUrl: process.env.RESET_PASS_UI_LINK,
 };
