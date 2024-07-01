@@ -2,11 +2,18 @@ import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync.js";
 import { AuthServices } from "./authService.js";
 import sendResponse from "../../utils/sendResponse.js";
+import config from "../../config/index.js";
 
 const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const result = await AuthServices.loginUser(email, password);
-  res.cookie("accessToken", result.token);
+  // Set the cookie on the backend
+  res.cookie("accessToken", result.token, {
+    httpOnly: true,
+    secure: config.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 24 * 60 * 60 * 1000,
+  });
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
