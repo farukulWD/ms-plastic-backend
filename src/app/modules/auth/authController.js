@@ -8,18 +8,30 @@ const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const result = await AuthServices.loginUser(email, password);
   // Set the cookie on the backend
-  res.cookie("accessToken", result.token, {
+  res.cookie("refreshToken", result.refreshToken, {
     httpOnly: true,
     secure: config.NODE_ENV === "production",
     sameSite: "strict",
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: 1000 * 60 * 60 * 1000,
   });
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "Login success",
-    data: { user: result?.user, accessToken: result.token },
+    data: { accessToken: result?.accessToken },
+  });
+});
+
+const getRefreshToken = catchAsync(async (req, res) => {
+  const { refreshToken } = req.cookies;
+  const result = await AuthServices.refreshToken(refreshToken);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Access token is retrieved successfully!",
+    data: { accessToken: result },
   });
 });
 
@@ -63,4 +75,5 @@ export const AuthControllers = {
   changePassword,
   forgotPass,
   resetPassword,
+  getRefreshToken,
 };

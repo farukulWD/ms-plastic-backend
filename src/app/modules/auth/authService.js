@@ -3,7 +3,7 @@ import { fileURLToPath } from "url";
 import httpStatus from "http-status";
 import config from "../../config/index.js";
 import AppError from "../../errors/AppError.js";
-import { createToken } from "../../utils/authToken.js";
+import { createToken, verifyToken } from "../../utils/authToken.js";
 import { User } from "../user/userModel.js";
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
@@ -38,10 +38,48 @@ const loginUser = async (email, password) => {
     role: user?.role,
   };
 
-  const token = createToken(jwtPayload, config.access_token, "1d");
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in
+  );
+  const refreshToken = createToken(
+    jwtPayload,
+    config.jwt_refresh_secret,
+    config.jwt_refresh_expires_in
+  );
 
   user.password = "";
-  return { user, token };
+  user.accessToken = accessToken;
+  return { accessToken, refreshToken };
+};
+
+const refreshToken = async (token) => {
+  const decoded = verifyToken(token, config.jwt_refresh_secret);
+  const { userId, userEmail, iat } = decoded;
+  const user = await User.findOne({ email: userEmail });
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
+  }
+  const isDeleted = user?.isDeleted;
+
+  if (isDeleted) {
+    throw new AppError(httpStatus.FORBIDDEN, "This user is deleted !");
+  }
+  const jwtPayload = {
+    userId: user?._id,
+    userEmail: user?.email,
+    role: user?.role,
+  };
+
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in
+  );
+
+  return accessToken;
 };
 
 const changePassword = async (id, passwordData) => {
@@ -96,7 +134,7 @@ const forgetPassword = async (req, email) => {
     role: user.role,
   };
 
-  const resetToken = createToken(jwtPayload, config.access_token, "10m");
+  const resetToken = createToken(jwtPayload, config.jwt_access_secret, "10m");
 
   const templatePath = path.join(
     __dirname,
@@ -109,7 +147,7 @@ const forgetPassword = async (req, email) => {
 
   const replacements = {
     name: user.name,
-    action_url: `${config.frontendUrl}/forgot-password?token=${resetToken}`,
+    action_url: `${config.frontendUrl}/reset-password?token=${resetToken}`,
     operating_system: osName,
     browser_name: browserName,
     support_url: `${config.frontendUrl}/support`,
@@ -143,7 +181,7 @@ const resetPassword = async (token, data) => {
     throw new AppError(httpStatus.FORBIDDEN, "This user is deleted !");
   }
 
-  const decoded = jwt.verify(token, config.access_token);
+  const decoded = jwt.verify(token, config.jwt_access_secret);
 
   if (email !== decoded.userEmail) {
     throw new AppError(httpStatus.FORBIDDEN, "You are forbidden!");
@@ -170,4 +208,5 @@ export const AuthServices = {
   changePassword,
   forgetPassword,
   resetPassword,
+  refreshToken,
 };
