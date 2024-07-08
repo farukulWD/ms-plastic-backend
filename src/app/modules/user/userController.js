@@ -19,7 +19,8 @@ const createUser = catchAsync(async (req, res) => {
 /*-------------------get all user -------------------- */
 
 const getUsers = catchAsync(async (req, res) => {
-  const result = await UserServices.getUsersFromDb();
+  const result = await UserServices.getUsersFromDb(req.query);
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     message: "Users retrieved success",

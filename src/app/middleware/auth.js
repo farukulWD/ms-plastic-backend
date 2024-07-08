@@ -12,7 +12,14 @@ const auth = (...roles) => {
       throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized!");
     }
 
-    const decode = jwt.verify(token, config.jwt_access_secret);
+    let decode;
+
+    try {
+      decode = jwt.verify(token, config.jwt_access_secret);
+    } catch (error) {
+      throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized!");
+    }
+
     const { userId, userEmail } = decode;
     const user = await User.findById(userId);
     if (!user) {

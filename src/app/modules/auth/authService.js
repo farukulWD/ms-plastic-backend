@@ -35,6 +35,7 @@ const loginUser = async (email, password) => {
   const jwtPayload = {
     userId: user._id,
     userEmail: user?.email,
+    name: user?.name,
     role: user?.role,
   };
 
@@ -55,7 +56,14 @@ const loginUser = async (email, password) => {
 };
 
 const refreshToken = async (token) => {
-  const decoded = verifyToken(token, config.jwt_refresh_secret);
+  let decoded;
+
+  try {
+    decoded = jwt.verify(token, config.jwt_refresh_expires_in);
+  } catch (error) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized!");
+  }
+
   const { userId, userEmail, iat } = decoded;
   const user = await User.findOne({ email: userEmail });
 
@@ -67,9 +75,11 @@ const refreshToken = async (token) => {
   if (isDeleted) {
     throw new AppError(httpStatus.FORBIDDEN, "This user is deleted !");
   }
+
   const jwtPayload = {
-    userId: user?._id,
+    userId: user._id,
     userEmail: user?.email,
+    name: user?.name,
     role: user?.role,
   };
 
@@ -130,8 +140,9 @@ const forgetPassword = async (req, email) => {
 
   const jwtPayload = {
     userId: user._id,
-    userEmail: user.email,
-    role: user.role,
+    userEmail: user?.email,
+    name: user?.name,
+    role: user?.role,
   };
 
   const resetToken = createToken(jwtPayload, config.jwt_access_secret, "10m");

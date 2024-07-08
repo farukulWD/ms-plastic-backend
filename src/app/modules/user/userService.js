@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { User } from "./userModel.js";
 import AppError from "../../errors/AppError.js";
 import httpStatus from "http-status";
+import buildFilter from "../../utils/buildFilter.js";
 
 /*-------------------create user-------------------- */
 
@@ -13,9 +14,38 @@ const createUserIntoDB = async (user) => {
 
 /*-------------------get all users-------------------- */
 
-const getUsersFromDb = async () => {
-  const users = await User.find({}).populate("addedProducts");
-  return users;
+const getUsersFromDb = async (query) => {
+  const { page, limit, sort, isDelete, mobile, ...rest } = query;
+  const filter = buildFilter(rest);
+  const sortOption = {
+    createdAt: sort === "newest" ? -1 : 1,
+  };
+
+  if (isDelete === "true" || isDelete === "false") {
+    filter.isDelete = isDelete;
+  }
+
+  const pageNumber = parseInt(page) || 1;
+  const limitNumber = parseInt(limit) || 30;
+  const skip = (pageNumber - 1) * limitNumber;
+
+  const users = await User.find(filter)
+    .populate("addedProducts")
+    .sort(sortOption)
+    .limit(limitNumber)
+    .skip(skip);
+
+  const totalUsers = await User.countDocuments(filter);
+  const totalPages = Math.ceil(totalUsers / limitNumber);
+
+  return {
+    users,
+    pagination: {
+      total: totalUsers,
+      totalPages,
+      currentPage: pageNumber,
+    },
+  };
 };
 
 /*-------------------get single user-------------------- */
