@@ -7,7 +7,8 @@ import catchAsync from "../../utils/catchAsync.js";
 
 const createUser = catchAsync(async (req, res) => {
   const userData = req?.body;
-  const result = await UserServices.createUserIntoDB(userData);
+  const file = req.file;
+  const result = await UserServices.createUserIntoDB(file, userData);
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     message: "User created",
