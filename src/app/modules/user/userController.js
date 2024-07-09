@@ -8,6 +8,14 @@ import catchAsync from "../../utils/catchAsync.js";
 const createUser = catchAsync(async (req, res) => {
   const userData = req?.body;
   const file = req.file;
+
+  if (!file) {
+    return sendResponse(res, {
+      statusCode: httpStatus.BAD_REQUEST,
+      message: "File upload failed",
+      success: false,
+    });
+  }
   const result = await UserServices.createUserIntoDB(file, userData);
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
