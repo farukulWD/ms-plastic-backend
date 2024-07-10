@@ -6,7 +6,15 @@ import { upload } from "../../utils/sendImageToCloudinary.js";
 
 const router = express.Router();
 
-router.post("/create-user", upload.single("file"), UserControllers.createUser);
+router.post(
+  "/create-user",
+  upload.single("file"),
+  (req, res, next) => {
+    req.body = JSON.parse(req.body.data);
+    next();
+  },
+  UserControllers.createUser
+);
 router.get(
   "/users",
   auth(user_role.admin, user_role.master),

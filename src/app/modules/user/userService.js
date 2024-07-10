@@ -10,16 +10,12 @@ import { sendImageToCloudinary } from "../../utils/sendImageToCloudinary.js";
 const createUserIntoDB = async (file, user) => {
   const userData = user;
   if (file) {
-    const imageName = `${userData.id}${userData?.name?.firstName}`;
+    const imageName = `${userData?.name}${new Date().toLocaleString()}`;
     const path = file?.path;
-    console.log(imageName, path);
-
     try {
-      // Send image to Cloudinary
       const { secure_url } = await sendImageToCloudinary(imageName, path);
-      userData.profileImg = secure_url;
+      userData.profilePicture = secure_url;
     } catch (error) {
-      console.error("Error uploading image to Cloudinary:", error);
       throw new AppError(
         httpStatus.INTERNAL_SERVER_ERROR,
         "Image upload failed"

@@ -6,9 +6,8 @@ import catchAsync from "../../utils/catchAsync.js";
 /*-------------------create user-------------------- */
 
 const createUser = catchAsync(async (req, res) => {
-  const userData = req?.body;
+  const userData = req.body;
   const file = req.file;
-
   if (!file) {
     return sendResponse(res, {
       statusCode: httpStatus.BAD_REQUEST,

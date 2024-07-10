@@ -34,16 +34,9 @@ export const sendImageToCloudinary = (imageName, path) => {
   });
 };
 
-const uploadDir = path.join(process.cwd(), "uploads");
-
-// Create the directory if it doesn't exist
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, uploadDir);
+    cb(null, process.cwd() + "/uploads/");
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
