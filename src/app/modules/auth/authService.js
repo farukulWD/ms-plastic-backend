@@ -158,7 +158,7 @@ const forgetPassword = async (req, email) => {
 
   const replacements = {
     name: user.name,
-    action_url: `${config.frontendUrl}/reset-password?token=${resetToken}`,
+    action_url: `${config.frontendUrl}/auth/reset-password?token=${resetToken}`,
     operating_system: osName,
     browser_name: browserName,
     support_url: `${config.frontendUrl}/support`,
