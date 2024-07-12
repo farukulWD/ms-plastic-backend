@@ -47,7 +47,8 @@ const getUsersFromDb = async (query) => {
     .populate("addedProducts")
     .sort(sortOption)
     .limit(limitNumber)
-    .skip(skip);
+    .skip(skip)
+    .select("-password");
 
   const totalUsers = await User.countDocuments(filter);
   const totalPages = Math.ceil(totalUsers / limitNumber);
@@ -69,9 +70,10 @@ const getSingleUserFromDB = async (id) => {
     throw new AppError(httpStatus.BAD_REQUEST, "Id is required");
   }
   if (id) {
-    const user = User.findOne({ _id: new ObjectId(id) }).populate(
-      "addedProducts"
-    );
+    const user = await User.findOne({ _id: new ObjectId(id) })
+      .populate("addedProducts")
+      .select("-password");
+
     return user;
   }
 };

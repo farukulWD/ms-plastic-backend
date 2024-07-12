@@ -192,7 +192,12 @@ const resetPassword = async (token, data) => {
     throw new AppError(httpStatus.FORBIDDEN, "This user is deleted !");
   }
 
-  const decoded = jwt.verify(token, config.jwt_access_secret);
+  let decoded;
+  try {
+    decoded = jwt.verify(token, config.jwt_access_secret);
+  } catch (error) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized!");
+  }
 
   if (email !== decoded.userEmail) {
     throw new AppError(httpStatus.FORBIDDEN, "You are forbidden!");
