@@ -25,6 +25,7 @@ export const productSchema = new Schema(
     },
     company: {
       type: String,
+      enum: ["RFL", "TEL"],
       required: true,
     },
     quantity: {
