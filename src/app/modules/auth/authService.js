@@ -151,11 +151,11 @@ const forgetPassword = async (req, email) => {
     __dirname,
     "../../email-template/resetPassword.html"
   );
+  // console.log(`${config.frontendUrl}/auth/reset-password?token=${resetToken}`);
 
   const parser = new UAParser(req.headers["user-agent"]);
   const osName = parser.getOS().name || "Unknown OS";
   const browserName = parser.getBrowser().name || "Unknown Browser";
-
   const replacements = {
     name: user.name,
     action_url: `${config.frontendUrl}/auth/reset-password?token=${resetToken}`,

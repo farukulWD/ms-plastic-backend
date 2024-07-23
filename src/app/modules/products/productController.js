@@ -74,6 +74,7 @@ const editProduct = async (req, res, next) => {
 
 const deleteProduct = async (req, res, next) => {
   const id = req.body;
+
   if (!id) {
     throw new AppError(httpStatus.BAD_REQUEST, "Id is required");
   }

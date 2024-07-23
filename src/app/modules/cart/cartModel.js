@@ -19,7 +19,10 @@ const productsSchema = new Schema(
 export const cartSchema = new Schema(
   {
     products: [productsSchema],
-
+    cartName: {
+      type: String,
+      require: true,
+    },
     user: {
       type: mongoose.Types.ObjectId,
       required: true,
