@@ -56,7 +56,10 @@ const getCartsFromDB = async (query) => {
 
   const carts = await Cart.find(filter)
     .populate("products.product")
-    .populate("user")
+    .populate({
+      path: "user",
+      select: "name  _id role profilePicture ",
+    })
     .sort(sortOption)
     .limit(limitNumber)
     .skip(skip);
