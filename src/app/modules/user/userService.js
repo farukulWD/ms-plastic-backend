@@ -90,7 +90,6 @@ const updateRole = async (id, email, role) => {
   if (user) {
     const result = await User.findOneAndUpdate(filter, update, {
       new: true,
-      upsert: true,
     });
     return result;
   } else {
@@ -110,7 +109,6 @@ const deleteUserFromDb = async (id) => {
   if (user) {
     const result = await User.findOneAndUpdate(filter, update, {
       new: true,
-      upsert: true,
     });
     return result;
   } else {

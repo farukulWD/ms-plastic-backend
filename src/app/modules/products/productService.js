@@ -125,7 +125,6 @@ const editProduct = async (id, product) => {
   if (findProduct) {
     const result = await Product.findOneAndUpdate(filter, update, {
       new: true,
-      upsert: true,
     });
     return result;
   } else {

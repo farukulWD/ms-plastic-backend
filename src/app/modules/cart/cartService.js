@@ -80,7 +80,10 @@ const getSingleCartFromDB = async (id) => {
   if (!id) {
     throw new AppError(httpStatus.BAD_REQUEST, "Cart Id is required");
   }
-  const result = await Cart.findById({ _id: new ObjectId(id) });
+  const result = await Cart.findById({ _id: new ObjectId(id) }).populate({
+    path: "products.product",
+    select: "_id code name price company groupName",
+  });
   return result;
 };
 
@@ -100,7 +103,6 @@ const editCart = async (id, product) => {
   const filter = { _id: new ObjectId(id) };
   await updateProductQuantities(cart?._id, product.products, "edit");
   const result = await Cart.findOneAndUpdate(filter, product, {
-    upsert: true,
     new: true,
   });
 
