@@ -8,11 +8,15 @@ const createUserValidation = z.object({
       .min(1)
       .max(30)
       .refine((value) => /^[A-Z]/.test(value), {
-        message: "Name must be start with capital latter",
+        message: "must be start with capital latter",
       })
       .optional(),
     email: z.string().email().optional(),
-    password: z.string().min(4).max(20).optional(),
+    password: z
+      .string()
+      .min(4, { message: "Minimum 4 characters" })
+      .max(20, { message: "Maximum 20 characters" })
+      .optional(),
 
     mobile: z
       .string()
