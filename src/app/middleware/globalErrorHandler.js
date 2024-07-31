@@ -7,7 +7,6 @@ import handleValidationError from "../errors/handleValidationError.js";
 import handleZodError from "../errors/HandleZodError.js";
 
 const globalErrorHandler = (err, req, res, next) => {
-  console.log({ global: err });
   let statusCode = 500;
   let message = "Something went wrong!";
   let errorSources = [

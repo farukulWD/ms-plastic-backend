@@ -25,7 +25,6 @@ const createUserValidation = z.object({
     role: z.enum(["user", "admin", "master", "manger"]).optional(),
     isDeleted: z.boolean().default(false).optional(),
     passwordChangedAt: z.date().optional(),
-    addedProducts: z.array(z.string().optional()),
   }),
 });
 

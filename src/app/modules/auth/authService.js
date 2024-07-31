@@ -151,7 +151,7 @@ const forgetPassword = async (req, email) => {
     __dirname,
     "../../email-template/resetPassword.html"
   );
-  // console.log(`${config.frontendUrl}/auth/reset-password?token=${resetToken}`);
+  // console.log(`${resetToken}`);
 
   const parser = new UAParser(req.headers["user-agent"]);
   const osName = parser.getOS().name || "Unknown OS";

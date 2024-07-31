@@ -14,6 +14,13 @@ const makeOrder = async (orderData) => {
   if (!orderData) {
     throw new AppError(httpStatus.BAD_REQUEST, "Order Data is required");
   }
+  const existOrder = await Order.findOne({
+    cart: orderData?.cart,
+  });
+
+  if (existOrder) {
+    throw new AppError(httpStatus.BAD_REQUEST, "This order already created");
+  }
   const user = await User.findOne({ _id: new ObjectId(userId) });
   if (!user) {
     throw new AppError(httpStatus.BAD_REQUEST, "User not found");
