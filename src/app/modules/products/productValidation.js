@@ -24,11 +24,7 @@ const createProductValidation = z.object({
       .number()
       .min(1, { message: "Quantity must be at least 1" })
       .default(1),
-    addedBy: z
-      .instanceof(mongoose.Types.ObjectId)
-      .refine((value) => mongoose.Types.ObjectId.isValid(value), {
-        message: "Invalid ObjectId",
-      }),
+    addedBy: z.string(),
   }),
 });
 
@@ -42,12 +38,7 @@ const updateProductValidation = z.object({
     price: z.number().min(0).optional(),
     company: z.enum(["RFL", "TEL"]).optional(),
     quantity: z.number().min(1).optional(),
-    addedBy: z
-      .instanceof(mongoose.Types.ObjectId)
-      .refine((value) => mongoose.Types.ObjectId.isValid(value), {
-        message: "Invalid ObjectId",
-      })
-      .optional(),
+    addedBy: z.string().optional(),
   }),
 });
 

@@ -99,24 +99,6 @@ const editProduct = async (id, product) => {
   if (!id) {
     throw new AppError(httpStatus.BAD_REQUEST, "Id is required");
   }
-  if (!product.code) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Code is required");
-  }
-  if (!product.name) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Name is required");
-  }
-  if (!product.groupName) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Group is required");
-  }
-  if (!product.price) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Price is required");
-  }
-  if (!product.company) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Product company name is required"
-    );
-  }
 
   const findProduct = await Product.findOne({ _id: new ObjectId(id) });
   const filter = { _id: new ObjectId(id) };

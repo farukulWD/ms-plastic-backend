@@ -51,28 +51,22 @@ const getSingleProduct = catchAsync(async (req, res) => {
 
 /*---------------------Edit Product-------------------*/
 
-const editProduct = async (req, res, next) => {
+const editProduct = catchAsync(async (req, res, next) => {
   const id = req.params;
   const product = req.body;
-  if (product && Object.keys(product).length > 0) {
-    const result = await ProductServices.editProduct(id, product);
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      message: "Edit Product has been success",
-      success: true,
-      data: result,
-    });
-  } else {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Product is required and can not be empty"
-    );
-  }
-};
+
+  const result = await ProductServices.editProduct(id, product);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Edit Product has been success",
+    success: true,
+    data: result,
+  });
+});
 
 /*--------------------Delete Product--------------------*/
 
-const deleteProduct = async (req, res, next) => {
+const deleteProduct = catchAsync(async (req, res, next) => {
   const id = req.body;
 
   if (!id) {
@@ -84,7 +78,7 @@ const deleteProduct = async (req, res, next) => {
     message: "The Product has been deleted",
     success: true,
   });
-};
+});
 
 export const ProductControllers = {
   addProduct,
