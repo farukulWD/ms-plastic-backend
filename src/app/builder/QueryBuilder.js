@@ -1,6 +1,3 @@
-import mongoose from "mongoose";
-const { Query } = mongoose;
-
 class QueryBuilder {
   constructor(modelQuery, query) {
     this.modelQuery = modelQuery;

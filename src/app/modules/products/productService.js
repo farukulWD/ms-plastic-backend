@@ -3,33 +3,12 @@ import { Product } from "./productModel.js";
 import { User } from "../user/userModel.js";
 import AppError from "../../errors/AppError.js";
 import httpStatus from "http-status";
-import buildFilter from "../../utils/buildFilter.js";
+import QueryBuilder from "../../builder/QueryBuilder.js";
+import { productSearchableFields } from "./productConstance.js";
 
 /**------------------add product------------------------ */
 
 const addProductIntoDB = async (product) => {
-  if (!product.code) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Code is required");
-  }
-  if (!product.name) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Name is required");
-  }
-  if (!product.groupName) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Group is required");
-  }
-  if (!product.price) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Price is required");
-  }
-  if (!product.company) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Product company name is required"
-    );
-  }
-  if (!product.addedBy) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product addedBy is required");
-  }
-
   const user = await User.findById(product.addedBy);
   if (!user) {
     throw new AppError(httpStatus.BAD_REQUEST, "User not found");
@@ -44,37 +23,22 @@ const addProductIntoDB = async (product) => {
 /**--------------------get products------------------- */
 
 const getProductsFromDB = async (query) => {
-  const { page, limit, sort, addedBy, ...rest } = query;
+  const productQuery = new QueryBuilder(
+    Product.find().populate("addedBy"),
+    query
+  )
+    .search(productSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
 
-  const filter = buildFilter(rest);
-
-  const sortOption = {
-    updatedAt: sort === "newest" ? -1 : 1,
-  };
-  if (addedBy) {
-    filter.addedBy = new ObjectId(addedBy);
-  }
-
-  const pageNumber = parseInt(page, 10) || 1;
-  const limitNumber = parseInt(limit, 10) || 10;
-  const skip = (pageNumber - 1) * limitNumber;
-
-  const products = await Product.find(filter)
-    .populate("addedBy")
-    .limit(limit)
-    .skip(skip)
-    .sort(sortOption);
-
-  const totalProducts = await Product.countDocuments(filter);
-  const totalPages = Math.ceil(totalProducts / limitNumber);
+  const products = await productQuery.modelQuery;
+  const pagination = await productQuery.countTotal();
 
   return {
     products,
-    pagination: {
-      total: totalProducts,
-      totalPages,
-      currentPage: pageNumber,
-    },
+    pagination,
   };
 };
 

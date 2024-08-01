@@ -3,7 +3,7 @@ import AppError from "../../errors/AppError.js";
 import httpStatus from "http-status";
 import { User } from "../user/userModel.js";
 import { Order } from "./orderModel.js";
-import buildFilter from "../../utils/buildFilter.js";
+import QueryBuilder from "../../builder/QueryBuilder.js";
 
 /*****************make order**************** */
 const makeOrder = async (orderData) => {
@@ -32,41 +32,21 @@ const makeOrder = async (orderData) => {
 /*-------------------Get Orders-------------------------- */
 
 const getOrdersFromDB = async (query) => {
-  const { page, limit, isDelivered, addedBy, sort, ...rest } = query;
-  const filter = buildFilter(rest);
+  const orderQuery = new QueryBuilder(
+    Order.find(filter).populate("cart").populate("addedBy"),
+    query
+  )
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
 
-  if (isDelivered) {
-    filter.isDelivered = isDelivered;
-  }
-  if (addedBy) {
-    filter.addedBy = new ObjectId(addedBy);
-  }
-
-  const pageNumber = parseInt(page, 10) || 1;
-  const limitNumber = parseInt(limit, 10) || 10;
-  const skip = (pageNumber - 1) * limitNumber;
-
-  const sortOption = {
-    updatedAt: sort === "newest" ? -1 : 1,
-  };
-
-  const orders = await Order.find(filter)
-    .populate("cart")
-    .populate("addedBy")
-    .skip(skip)
-    .limit(limit)
-    .sort(sortOption);
-
-  const totalOrder = await Order.countDocuments(filter);
-  const totalPages = Math.ceil(totalOrder / limitNumber);
+  const orders = await orderQuery.modelQuery;
+  const pagination = await orderQuery.countTotal();
 
   return {
     orders,
-    pagination: {
-      total: totalOrder,
-      totalPages,
-      currentPage: pageNumber,
-    },
+    pagination,
   };
 };
 

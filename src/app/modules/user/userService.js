@@ -2,8 +2,9 @@ import { ObjectId } from "mongodb";
 import { User } from "./userModel.js";
 import AppError from "../../errors/AppError.js";
 import httpStatus from "http-status";
-import buildFilter from "../../utils/buildFilter.js";
 import { sendImageToCloudinary } from "../../utils/sendImageToCloudinary.js";
+import QueryBuilder from "../../builder/QueryBuilder.js";
+import { userSearchableFields } from "./userConstance.js";
 
 /*-------------------create user-------------------- */
 
@@ -29,37 +30,22 @@ const createUserIntoDB = async (file, user) => {
 /*-------------------get all users-------------------- */
 
 const getUsersFromDb = async (query) => {
-  const { page, limit, sort, isDelete, mobile, ...rest } = query;
-  const filter = buildFilter(rest);
-  const sortOption = {
-    createdAt: sort === "newest" ? -1 : 1,
-  };
+  const userQuery = new QueryBuilder(
+    User.find().populate("addedProducts"),
+    query
+  )
+    .search(userSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
 
-  if (isDelete === "true" || isDelete === "false") {
-    filter.isDelete = isDelete;
-  }
-
-  const pageNumber = parseInt(page) || 1;
-  const limitNumber = parseInt(limit) || 30;
-  const skip = (pageNumber - 1) * limitNumber;
-
-  const users = await User.find(filter)
-    .populate("addedProducts")
-    .sort(sortOption)
-    .limit(limitNumber)
-    .skip(skip)
-    .select("-password");
-
-  const totalUsers = await User.countDocuments(filter);
-  const totalPages = Math.ceil(totalUsers / limitNumber);
+  const pagination = await userQuery.countTotal();
+  const users = await userQuery.modelQuery;
 
   return {
     users,
-    pagination: {
-      total: totalUsers,
-      totalPages,
-      currentPage: pageNumber,
-    },
+    pagination,
   };
 };
 

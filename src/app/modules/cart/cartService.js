@@ -7,7 +7,8 @@ import {
 } from "../../utils/aggregation/index.js";
 import AppError from "../../errors/AppError.js";
 import httpStatus from "http-status";
-import buildFilter from "../../utils/buildFilter.js";
+import QueryBuilder from "../../builder/QueryBuilder.js";
+import { cartSearchableFields } from "./cartConstance.js";
 
 /******************add cart************************/
 const makeCartIntoDB = async (userId, bodyData) => {
@@ -36,43 +37,25 @@ const makeCartIntoDB = async (userId, bodyData) => {
 
 /******************gets all carts************************/
 const getCartsFromDB = async (query) => {
-  const { page, limit, sort, isOrder, user, ...rest } = query;
-
-  const filter = buildFilter(rest);
-
-  if (isOrder === "true" || isOrder === "false") {
-    filter.isOrder = isOrder;
-  }
-  if (user) {
-    filter.user = new ObjectId(user);
-  }
-
-  const sortOption = {
-    createdAt: sort === "newest" ? -1 : 1,
-  };
-  const pageNumber = parseInt(page);
-  const limitNumber = parseInt(limit);
-  const skip = (pageNumber - 1) * limitNumber;
-
-  const carts = await Cart.find(filter)
-    .populate("products.product")
-    .populate({
+  const cartQuery = new QueryBuilder(
+    Cart.find().populate("products.product").populate({
       path: "user",
       select: "name  _id role profilePicture ",
-    })
-    .sort(sortOption)
-    .limit(limitNumber)
-    .skip(skip);
-  const totalCarts = await Cart.countDocuments(filter);
-  const totalPages = Math.ceil(totalCarts / limitNumber);
+    }),
+    query
+  )
+    .search(cartSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const pagination = await cartQuery.countTotal();
+  const carts = await cartQuery.modelQuery;
 
   return {
     carts,
-    pagination: {
-      total: totalCarts,
-      totalPages,
-      currentPage: pageNumber,
-    },
+    pagination,
   };
 };
 /******************get single cart************************/
@@ -88,6 +71,7 @@ const getSingleCartFromDB = async (id) => {
 };
 
 /******************edit cart************************/
+
 const editCart = async (id, product) => {
   if (!product) {
     throw new AppError(httpStatus.BAD_REQUEST, "Product is Required");
@@ -113,6 +97,7 @@ const editCart = async (id, product) => {
 };
 
 /******************Delete cart************************/
+
 const deleteCartFromDB = async (cartId) => {
   if (!cartId) {
     throw new AppError(httpStatus.BAD_REQUEST, "Cart Id is required");
