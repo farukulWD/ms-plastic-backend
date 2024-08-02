@@ -20,6 +20,12 @@ class QueryBuilder {
     const queryObj = { ...this.query };
     const excludeFields = ["searchTerm", "sort", "limit", "page", "fields"];
     excludeFields.forEach((el) => delete queryObj[el]);
+    Object.keys(queryObj).forEach((key) => {
+      if (queryObj[key] === "") {
+        delete queryObj[key];
+      }
+    });
+
     this.modelQuery = this.modelQuery.find(queryObj);
     return this;
   }
