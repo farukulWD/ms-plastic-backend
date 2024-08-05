@@ -13,24 +13,24 @@ export const userSchema = new Schema(
   {
     name: {
       type: String,
-      require: true,
+      required: true,
     },
     email: {
       type: String,
-      require: true,
+      required: true,
       unique: true,
     },
     password: {
       type: String,
-      require: true,
+      required: true,
     },
     profilePicture: {
       type: String,
-      require: true,
+      required: true,
     },
     mobile: {
       type: Number,
-      require: true,
+      required: true,
     },
     role: {
       type: String,
@@ -41,6 +41,9 @@ export const userSchema = new Schema(
       type: Boolean,
       enum: [true, false],
       default: false,
+    },
+    passwordChangedAt: {
+      type: Date,
     },
     addedProducts: [{ type: mongoose.Types.ObjectId, ref: "Product" }],
   },
@@ -70,7 +73,7 @@ userSchema.statics.isPasswordMatch = async function (
   plainTextPassword,
   hashedPassword
 ) {
-  return bcrypt.compare(plainTextPassword, hashedPassword);
+  return await bcrypt.compare(plainTextPassword, hashedPassword);
 };
 
 export const User = model("User", userSchema);

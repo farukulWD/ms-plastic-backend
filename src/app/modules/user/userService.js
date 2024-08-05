@@ -2,20 +2,51 @@ import { ObjectId } from "mongodb";
 import { User } from "./userModel.js";
 import AppError from "../../errors/AppError.js";
 import httpStatus from "http-status";
+import { sendImageToCloudinary } from "../../utils/sendImageToCloudinary.js";
+import QueryBuilder from "../../builder/QueryBuilder.js";
+import { userSearchableFields } from "./userConstance.js";
 
 /*-------------------create user-------------------- */
 
-const createUserIntoDB = async (user) => {
+const createUserIntoDB = async (file, user) => {
   const userData = user;
+  if (file) {
+    const imageName = `${userData?.name}${new Date().toLocaleString()}`;
+    const path = file?.path;
+    try {
+      const { secure_url } = await sendImageToCloudinary(imageName, path);
+      userData.profilePicture = secure_url;
+    } catch (error) {
+      throw new AppError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Image upload failed"
+      );
+    }
+  }
   const newUser = await User.create(userData);
   return newUser;
 };
 
 /*-------------------get all users-------------------- */
 
-const getUsersFromDb = async () => {
-  const users = await User.find({}).populate("addedProducts");
-  return users;
+const getUsersFromDb = async (query) => {
+  const userQuery = new QueryBuilder(
+    User.find().populate("addedProducts"),
+    query
+  )
+    .search(userSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const pagination = await userQuery.countTotal();
+  const users = await userQuery.modelQuery;
+
+  return {
+    users,
+    pagination,
+  };
 };
 
 /*-------------------get single user-------------------- */
@@ -25,9 +56,10 @@ const getSingleUserFromDB = async (id) => {
     throw new AppError(httpStatus.BAD_REQUEST, "Id is required");
   }
   if (id) {
-    const user = User.findOne({ _id: new ObjectId(id) }).populate(
-      "addedProducts"
-    );
+    const user = await User.findOne({ _id: new ObjectId(id) })
+      .populate("addedProducts")
+      .select("-password");
+
     return user;
   }
 };
@@ -44,7 +76,6 @@ const updateRole = async (id, email, role) => {
   if (user) {
     const result = await User.findOneAndUpdate(filter, update, {
       new: true,
-      upsert: true,
     });
     return result;
   } else {
@@ -64,7 +95,6 @@ const deleteUserFromDb = async (id) => {
   if (user) {
     const result = await User.findOneAndUpdate(filter, update, {
       new: true,
-      upsert: true,
     });
     return result;
   } else {

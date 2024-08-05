@@ -3,31 +3,12 @@ import { Product } from "./productModel.js";
 import { User } from "../user/userModel.js";
 import AppError from "../../errors/AppError.js";
 import httpStatus from "http-status";
+import QueryBuilder from "../../builder/QueryBuilder.js";
+import { productSearchableFields } from "./productConstance.js";
+
+/**------------------add product------------------------ */
 
 const addProductIntoDB = async (product) => {
-  if (!product.code) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Code is required");
-  }
-  if (!product.name) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Name is required");
-  }
-  if (!product.groupName) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Group is required");
-  }
-  if (!product.price) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Price is required");
-  }
-  if (!product.company) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Product company name is required"
-    );
-  }
-  if (!product.addedBy) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product addedBy is required");
-  }
-
-  /*************************get user********************/
   const user = await User.findById(product.addedBy);
   if (!user) {
     throw new AppError(httpStatus.BAD_REQUEST, "User not found");
@@ -39,32 +20,48 @@ const addProductIntoDB = async (product) => {
   return result;
 };
 
-const getProductsFromDB = async () => {
-  const result = Product.find({}).populate("addedBy");
-  return result;
+/**--------------------get products------------------- */
+
+const getProductsFromDB = async (query) => {
+  const productQuery = new QueryBuilder(
+    Product.find().populate("addedBy"),
+    query
+  )
+    .search(productSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const products = await productQuery.modelQuery;
+  const pagination = await productQuery.countTotal();
+
+  return {
+    products,
+    pagination,
+  };
 };
+
+/*------------------Get single product-------------- */
+
+const getSingleProductFromDB = async (id) => {
+  if (!id) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Id is Required");
+  }
+
+  const product = await Product.findOne({ _id: new ObjectId(id) });
+  if (!product) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Product not found");
+  }
+
+  return product;
+};
+
+/**--------------------edit products------------------- */
 
 const editProduct = async (id, product) => {
   if (!id) {
     throw new AppError(httpStatus.BAD_REQUEST, "Id is required");
-  }
-  if (!product.code) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Code is required");
-  }
-  if (!product.name) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Name is required");
-  }
-  if (!product.groupName) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Group is required");
-  }
-  if (!product.price) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Product Price is required");
-  }
-  if (!product.company) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Product company name is required"
-    );
   }
 
   const findProduct = await Product.findOne({ _id: new ObjectId(id) });
@@ -74,13 +71,14 @@ const editProduct = async (id, product) => {
   if (findProduct) {
     const result = await Product.findOneAndUpdate(filter, update, {
       new: true,
-      upsert: true,
     });
     return result;
   } else {
     throw new AppError(httpStatus.BAD_REQUEST, "Product not found");
   }
 };
+
+/**--------------------edit products------------------- */
 
 const deleteProductFromDB = async (id) => {
   if (!id) {
@@ -101,4 +99,5 @@ export const ProductServices = {
   editProduct,
   deleteProductFromDB,
   getProductsFromDB,
+  getSingleProductFromDB,
 };
